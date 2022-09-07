@@ -15,64 +15,54 @@ graph = [
     ['t', '-->', 'w'],
 ]
 
+def depth_first_search_noncycles(start_state, goal_state):
+    return dfs_q([[start_state]], goal_state, graph, explored=[start_state])
 
-def DFS_noncycles(startState, goalState):
-    return DFS_Q([[startState]], goalState, graph, V=[startState])
-
-
-def GetMoves(sState, lst):
-    if lst == []:
+def get_moves(start_state, g_list):
+    if(g_list == []):
         return []
     else:
-        templst = lst.copy()
-        x = templst.pop(0)
-        tempx = x.copy()
-        if tempx.pop(0) == sState:
-            return [tempx.pop(1)] + GetMoves(sState, templst)
+        temp_graph = g_list.copy()
+        path = temp_graph.pop(0)
+        copy_path = path.copy()
+        if(copy_path.pop(0) == start_state):
+            return [copy_path.pop(1)] + get_moves(start_state, temp_graph)
         else:
-            return GetMoves(sState, templst)
+            return get_moves(start_state, temp_graph)
 
+def extend_path(path, next_state, explored):
+	if(len(next_state)<1): 
+		return []
+	elif next_state[0] in path:
+		next_state.pop(0)
+		return extend_path(path, next_state, explored)
+	elif next_state[0] in explored:
+		next_state.pop(0)
+		return extend_path(path, next_state, explored)
+	else:
+		el = next_state.pop(0)
+		explored.append(el)
+		return [[el]+path] + extend_path(path, next_state, explored)
 
-def extend_all_DFS(path, nextStates, V):
-    if len(nextStates) < 1:
-        return []
-    elif nextStates[0] in path:
-        nextStates.pop(0)
-        return extend_all_DFS(path, nextStates, V)
-    elif nextStates[0] in V:
-        nextStates.pop(0)
-        return extend_all_DFS(path, nextStates, V)
-    else:
-        x = nextStates.pop(0)
-        V.append(x)
-        return [[x]+path] + extend_all_DFS(path, nextStates, V)
-
-
-count = 0
-
-
-def DFS_Q(paths, goalState, lst, V):
+def dfs_q(paths, goal_state, graph, explored):
     global count
     count += 1
-    print(f"\n{count}--DFS path--\n", paths)
+    print("\n {} depth first search \n path --> {} \n".format(count, paths))
 
     if len(paths) < 1:
         return paths
-    elif paths[0][0] == goalState:
+    elif paths[0][0] == goal_state:
         return paths[0]
     else:
-        lstTemp = lst.copy()
-        tempPaths = paths.copy()
-        p = tempPaths[0]
-        x = tempPaths[0][0]
-        tempPaths.pop(0)
-        moves = GetMoves(x, lstTemp)
-        #print("-p-", p)
-        #print("-moves-", moves)
-        print("-V-", V)
-        nextPaths = extend_all_DFS(p, moves, V)
-        return DFS_Q(nextPaths + tempPaths, goalState, lstTemp, V)
+        temp_graph = graph.copy()
+        temp_paths = paths.copy()
+        current_path = temp_paths[0]
+        present_node = temp_paths[0][0]
 
+        next_state = get_moves(present_node, temp_graph)
+        next_paths = extend_path(current_path, next_state, explored)
+        return dfs_q(next_paths + temp_paths, goal_state, temp_graph, explored)
 
-res = DFS_noncycles('u', 'w')
-print(f"\n{count+1}--DFS result--\n", res)
+count = 0
+dfs = depth_first_search_noncycles('u', 'w')
+print("\n=== result === \n path: {} \n ".format(dfs))
